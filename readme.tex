@@ -88,6 +88,71 @@ S-a adaugat zgomot la coloanele numerice relevante. Acest zgomot a fost generat 
 \sloppy
 S-au introdus valori NaN in mod aleatoriu pentru 5\% din instante in urmatoarele coloane: \texttt{Pollen\_Scent\_Complexity},\ \texttt{Bioluminescence\_Intensity\_Lux},\ \texttt{Growth\_Rate\_mm\_day},\ \texttt{Soil\_Nutrient\_Level},\ si \texttt{Soil\_Moisture\_Level}.
 
+\section{Analiza Exploratorie a Datelor (EDA)}
 
+\subsection{Sumarizare Generala a Setului de Date}
+Initial, s-a realizat o sumarizare generala a setului de date, care a inclus:
+\begin{itemize}[noitemsep, topsep=1pt]
+    \item Dimensiunea setului de date: (1000 de randuri, 14 coloane).
+    \item Tipurile de date pentru fiecare coloana: majoritatea float64, una int64 (\texttt{Symbiotic\_Fungus\_Present}) si doua de tip object (\texttt{Plant\_Message\_Type}, \texttt{Temperature\_Stress\_Factor}) (intial si Plant_ID, dar am scos o din setul de date dupa EDA, nefiind relevanta).
+    \item Numarul de valori lipsa per coloana (inainte de imputare): 80 de valori lipsa pentru fiecare din cele 5 coloane mentionate anterior.
+    \item Numarul de randuri duplicate: 0.
+\end{itemize}
+
+\subsection{Analiza Variabilelor Numerice}
+Pentru variabilele numerice, s-au calculat statistici descriptive (medie, deviatie standard, min, max, quartile) si s-au generat boxplot-uri pentru a vizualiza distributiile si a identifica potentiali outlieri. Din boxploturi nu am identficat coloane cu valori aberante, ci mai degraba coloane cu plaje largi de valori. Totusi, am aplicat ulterior un tratament al outlierilor prin metoda IQR capping cu intervalele quantile 0.1/0.9.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{numeric_boxplots.png}
+    \caption{Boxplots date numerice}
+    \label{fig:boxplots_numeric}
+\end{figure}
+
+\textit{Observatii:}
+\begin{itemize}[noitemsep, topsep=1pt]
+    \item \texttt{Leaf\_Vibration\_Hz}: Distributie relativ simetrica in jurul valorii de 50 Hz.
+    \item \texttt{Pollen\_Scent\_Complexity}: Valori intre 1 si 10, cu mediana la 5.
+    \item \texttt{Bioluminescence\_Intensity\_Lux}: O distributie puternic asimetrica la dreapta, cu multe valori mici si cativa posibili outlieri semnificativi cu valori mari.
+    \item \texttt{Photosynthetic\_Efficiency\_Index}: Majoritatea valorilor sunt concentrate in jumatatea inferioara a intervalului [0,1].
+\end{itemize}
+
+\subsection{Analiza Variabilelor Categorice}
+Pentru variabilele categorice (\texttt{Plant\_Message\_Type} si \texttt{Temperature\_Stress\_Factor}), s-au analizat numarul de valori unice si distributia acestora prin countplot-uri.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{message_distr.png}
+    \caption{Distributia \texttt{Plant\_Message\_Type}.}
+    \label{fig:countplot_message}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\linewidth]{stress_distr.png}
+    \caption{Distributia \texttt{Temperature\_Stress\_Factor}.}
+    \label{fig:countplot_stress}
+\end{figure}
+
+
+\textit{Observatii:}
+\begin{itemize}[noitemsep, topsep=1pt]
+    \item \texttt{Plant\_Message\_Type}: Se observa un usor dezechilibru de clasa, voi folosi class weights pentru antrenarea modelului.
+\end{itemize}
+
+\subsection{Analiza Corelatiei intre Atributele Numerice}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{correlation.png} %
+    \caption{Matricea de Corelatie pentru Atributele Numerice.}
+    \label{fig:correlation_matrix}
+\end{figure}
+
+\textit{Observatii:}
+\sloppy
+\begin{itemize}[noitemsep, topsep=1pt]
+    \item Majoritatea corelatiilor intre variabilele numerice sunt slabe (valori apropiate de 0).
+    \item Corelatiile mai notabile, desi moderate, sunt observate intre \texttt{Photosynthetic\_Efficiency\_Index} si \texttt{Soil\_Nutrient\_Level} (0.52), \texttt{Soil\_Moisture\_Level} (0.43), si \texttt{Sunlight\_Exposure\_Hours} (0.39). Aceste corelatii indica logica de generare a indicelui de eficienta.
+\end{itemize}
 
 \end{document}
