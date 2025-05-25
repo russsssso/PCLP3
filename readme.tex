@@ -69,5 +69,25 @@
 \clearpage
 \pagenumbering{arabic}
 
+\section{Setul de Date}
+
+Pentru aceasta tema am ales setul de date \href{https://www.kaggle.com/datasets/efeyldz/plant-communication-dataset-classification?resource=download}{Plant Communication Dataset} (pare sa fie generat sintetic) de pe platforma Kaggle, pentru o problema de clasificare.
+
+Setul de date initial a fost augmentat prin adaugarea a trei noi coloane:
+\sloppy
+\begin{itemize}
+    \item  \textbf{Soil\_Nutrient\_Level}: O coloana pentru nivelul de nutrienti din sol. Valorile au fost generate dintr-o distributie normala, cu medii si deviatii standard specifice fiecarui tip de mesaj (\texttt{Plant\_Message\_Type}), pentru a reflecta o legatura intre starea plantei si nutrienti - am folosit deviatii standard mari a.i. plajele de valori sa se intercaleze mult, pentru a nu crea o coloana puternic corelata cu coloana target.
+    \item \textbf{Temperature\_Stress\_Factor}: O coloana categorica ('Low', 'Medium', 'High') derivata din \texttt{Ambient\_Temperature\_C}, indicand nivelul de stres termic.
+    \item \textbf{Photosynthetic\_Efficiency\_Index}: Un indice calculat pe baza factorilor de stres termic, umiditate, nutrienti si expunere la soare, reflectand eficienta fotosintetica.
+\end{itemize}
+
+\subsection{Introducerea Zgomotului}
+S-a adaugat zgomot la coloanele numerice relevante. Acest zgomot a fost generat dintr-o distributie normala cu media 0 si o deviatie standard egala cu 2\% din deviatia standard a fiecarei coloane. Coloanele afectate includ cele initiale numerice si cele nou create (\texttt{Soil\_Nutrient\_Level}, \  \texttt{Photosynthetic\_Efficiency\_Index}). Valorile au fost ulterior limitate pentru a ramane in intervale plauzibile.
+
+\subsection{Simularea Valorilor Lipsa (NaN)}
+\sloppy
+S-au introdus valori NaN in mod aleatoriu pentru 5\% din instante in urmatoarele coloane: \texttt{Pollen\_Scent\_Complexity},\ \texttt{Bioluminescence\_Intensity\_Lux},\ \texttt{Growth\_Rate\_mm\_day},\ \texttt{Soil\_Nutrient\_Level},\ si \texttt{Soil\_Moisture\_Level}.
+
+
 
 \end{document}
