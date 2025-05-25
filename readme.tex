@@ -1,0 +1,73 @@
+\documentclass[11pt, a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{hyperref}
+\usepackage{listings} 
+\usepackage{array}
+\usepackage{longtable} 
+\usepackage{float} 
+\usepackage{enumitem} 
+\usepackage{titling}
+
+\geometry{a4paper, margin=1in}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,
+    urlcolor=cyan,
+    pdftitle={README - Proiect PCLP3 Partea I},
+    pdfpagemode=FullScreen,
+}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{lightgray!20},
+    commentstyle=\color{green!50!black},
+    keywordstyle=\color{blue},
+    numberstyle=\tiny\color{gray},
+    stringstyle=\color{purple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2
+}
+\lstset{style=mystyle}
+
+\newcommand{\studentname}{Rusu Andrei Ionut C2 341}
+\title{Proiect PCLP3 - Partea I }
+\date{\today}
+
+% Redefine \maketitle to include student info at the top
+\makeatletter
+\renewcommand{\maketitle}{
+  \begin{center}
+    \Large \studentname \\
+    \Huge \@title \\[1.5em]
+    \large \@date
+    \vspace{2em}
+  \end{center}
+  \par
+  \thispagestyle{empty}
+}
+\makeatother
+
+\begin{document}
+\maketitle
+\thispagestyle{empty}
+\clearpage
+\pagenumbering{arabic}
+
+
+\end{document}
