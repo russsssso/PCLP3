@@ -13,6 +13,7 @@
 \usepackage{float} 
 \usepackage{enumitem} 
 \usepackage{titling}
+\usepackage{booktabs}
 
 \geometry{a4paper, margin=1in}
 
@@ -71,12 +72,12 @@
 
 \section{Setul de Date}
 
-Pentru aceasta tema am ales setul de date \href{https://www.kaggle.com/datasets/efeyldz/plant-communication-dataset-classification?resource=download}{Plant Communication Dataset} (pare sa fie generat sintetic) de pe platforma Kaggle, pentru o problema de clasificare.
+Pentru aceasta tema am ales setul de date \href{https://www.kaggle.com/datasets/efeyldz/plant-communication-dataset-classification?resource=download}{Plant Communication Dataset} (pare sa fie generat sintetic si bazat pe o ipoteza speculativa) de pe platforma Kaggle, pentru o problema de clasificare.
 
 Setul de date initial a fost augmentat prin adaugarea a trei noi coloane:
 \sloppy
 \begin{itemize}
-    \item  \textbf{Soil\_Nutrient\_Level}: O coloana pentru nivelul de nutrienti din sol. Valorile au fost generate dintr-o distributie normala, cu medii si deviatii standard specifice fiecarui tip de mesaj (\texttt{Plant\_Message\_Type}), pentru a reflecta o legatura intre starea plantei si nutrienti - am folosit deviatii standard mari a.i. plajele de valori sa se intercaleze mult, pentru a nu crea o coloana puternic corelata cu coloana target.
+    \item  \textbf{Soil\_Nutrient\_Level}: O coloana pentru nivelul de nutrienti din sol. Valorile au fost generate dintr-o distributie normala, cu medii si deviatii standard specifice fiecarui tip de mesaj (\texttt{Plant\_Message\_Type}), pentru a reflecta o legatura intre starea plantei si nutrienti. Am folosit deviatii standard mari a.i. plajele de valori sa se intercaleze mult, pentru a nu crea o coloana puternic corelata cu coloana target.
     \item \textbf{Temperature\_Stress\_Factor}: O coloana categorica ('Low', 'Medium', 'High') derivata din \texttt{Ambient\_Temperature\_C}, indicand nivelul de stres termic.
     \item \textbf{Photosynthetic\_Efficiency\_Index}: Un indice calculat pe baza factorilor de stres termic, umiditate, nutrienti si expunere la soare, reflectand eficienta fotosintetica.
 \end{itemize}
@@ -94,7 +95,7 @@ S-au introdus valori NaN in mod aleatoriu pentru 5\% din instante in urmatoarele
 Initial, s-a realizat o sumarizare generala a setului de date, care a inclus:
 \begin{itemize}[noitemsep, topsep=1pt]
     \item Dimensiunea setului de date: (1000 de randuri, 14 coloane).
-    \item Tipurile de date pentru fiecare coloana: majoritatea float64, una int64 (\texttt{Symbiotic\_Fungus\_Present}) si doua de tip object (\texttt{Plant\_Message\_Type}, \texttt{Temperature\_Stress\_Factor}) (intial si Plant_ID, dar am scos o din setul de date dupa EDA, nefiind relevanta).
+    \item Tipurile de date pentru fiecare coloana: majoritatea float64, una int64 (\texttt{Symbiotic\_Fungus\_Present}) si doua de tip object (\texttt{Plant\_Message\_Type}, \texttt{Temperature\_Stress\_Factor}) (intial si \texttt{Plant\_ID}, dar am scos o din setul de date dupa EDA, nefiind relevanta).
     \item Numarul de valori lipsa per coloana (inainte de imputare): 80 de valori lipsa pentru fiecare din cele 5 coloane mentionate anterior.
     \item Numarul de randuri duplicate: 0.
 \end{itemize}
@@ -155,4 +156,84 @@ Pentru variabilele categorice (\texttt{Plant\_Message\_Type} si \texttt{Temperat
     \item Corelatiile mai notabile, desi moderate, sunt observate intre \texttt{Photosynthetic\_Efficiency\_Index} si \texttt{Soil\_Nutrient\_Level} (0.52), \texttt{Soil\_Moisture\_Level} (0.43), si \texttt{Sunlight\_Exposure\_Hours} (0.39). Aceste corelatii indica logica de generare a indicelui de eficienta.
 \end{itemize}
 
+\section{Preprocesarea Datelor}
+Inainte de antrenarea modelului setul de date a trecut prin urmatoarele etape de preprocesare:
+
+\subsection{Tratarea Valorilor Lipsa (Imputare)}
+Valorile lipsa identificate in timpul EDA au fost tratate astfel:
+\sloppy
+\begin{itemize}[noitemsep, topsep=1pt]
+    \item Pentru \textbf{coloanele numerice} (\texttt{Pollen\_Scent\_Complexity}, \texttt{Bioluminescence\_Intensity\_Lux}, \texttt{Growth\_Rate\_mm\_day}, \texttt{Soil\_Moisture\_Level}, \texttt{Soil\_Nutrient\_Level}), valorile NaN au fost imputate folosind \textbf{mediana} fiecarei coloane.
+    \item Pentru \textbf{coloanele categorice}, strategia generala ar fi fost imputarea cu \textbf{mode}. In acest set de date, dupa augmentare, coloanele categorice ramase in features nu prezentau valori lipsa.
+\end{itemize}
+
+
+\subsection{Tratarea Outlierilor (IQR Capping)}
+Pentru coloanele numerice, s-a aplicat o metoda de limitare (capping) a outlierilor bazata pe Intervalul Intercuartilic (IQR). S-au utilizat cuantilele $Q1=0.1$ si $Q3=0.9$ si un factor de $1.5 \times IQR$ pentru a defini limitele. Valorile din afara acestor limite au fost inlocuite cu valoarea limitei corespunzatoare. Efectul acestei operatii a fost vizualizat prin boxplot-uri inainte si dupa capping; de exemplu, pentru \texttt{Bioluminescence\_Intensity\_Lux}, 4 valori superioare au fost limitate.
+
+\subsection{Impartirea Setului de Date (Train/Test Split)}
+Setul de date preprocesat (\texttt{df\_processed}) a fost impartit intr-un set de antrenare (80\%) si un set de testare (20\%) folosind \texttt{train\_test\_split} din \texttt{scikit-learn}, cu stratificare pe baza variabilei tinta \texttt{Plant\_Message\_Type}.
+
+\subsection{Standardizarea Datelor Numerice (Scalare)}
+Coloanele numerice din \texttt{X\_train} si \texttt{X\_test} au fost standardizate folosind \texttt{StandardScaler}.
+
+\subsection{Encodarea Variabilelor Categorice}
+\sloppy
+\begin{itemize}[noitemsep, topsep=1pt]
+    \item \textbf{Variabila Tinta}: \texttt{Plant\_Message\_Type} a fost encodata numeric folosind \texttt{LabelEncoder}.
+    \item \textbf{Caracteristici (Features)}: Pentru variabilele categorice din \texttt{X\_train} si \texttt{X\_test}:
+        \begin{itemize}[noitemsep, topsep=0pt]
+            \item \texttt{Temperature\_Stress\_Factor} a fost tratata ca variabila ordinala si encodata cu \texttt{OrdinalEncoder} (cu \texttt{handle\_unknown='use\_encoded\_value'}, \texttt{unknown\_value=-1}).
+            \item Alte coloane categorice (daca ar fi fost prezente si definite ca nominale, ex. \texttt{Plant\_ID} daca nu ar fi fost eliminat anterior si ar fi fost tratat ca feature) ar fi fost encodate cu \texttt{OneHotEncoder}.
+        \end{itemize}
+\end{itemize}
+
+\section{Modelare si Rezultate}
+\subsection{Modelul Utilizat si Antrenarea}
+A fost utilizat un clasificator \textbf{Random Forest}. Hiperparametrii principali folositi in antrenarea finala au fost:
+\begin{itemize}[noitemsep, topsep=1pt]
+    \item \texttt{n\_estimators=500}
+    \item \texttt{criterion='log\_loss'}
+    \item \texttt{max\_depth=None}
+    \item \texttt{min\_samples\_leaf=1}
+    \item \texttt{max\_features='sqrt'}
+    \item \texttt{class\_weight='balanced'} (pentru a contracara dezechilibrul claselor)
+    \item \texttt{random\_state=42}
+    \item \texttt{oob\_score=True}
+\end{itemize}
+
+\subsubsection{Metrici de Clasificare}
+Principalele metrici de performanta sunt prezentate in tabelul de mai jos.
+
+\begin{table}[H]
+\centering
+\caption{Raport de Clasificare pentru RandomForestClassifier}
+\label{tab:classification_report_final}
+\begin{tabular}{@{}lrrrr@{}}
+\toprule
+\textbf{Clasa} & \textbf{Precision} & \textbf{Recall} & \textbf{F1-score} & \textbf{Support} \\
+\midrule
+Contentment & 0.53 & 0.84 & 0.65 & 82 \\
+Distress    & 0.44 & 0.62 & 0.52 & 39 \\
+Invitation  & 0.00 & 0.00 & 0.00 & 37 \\
+Warning     & 0.25 & 0.10 & 0.14 & 42 \\
+\midrule
+Accuracy    &      &      & \textbf{0.48} & 200 \\
+Macro Avg   & 0.31 & 0.39 & 0.33 & 200 \\
+Weighted Avg& 0.36 & 0.48 & 0.40 & 200 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{dazed_and_confused.png}
+    \caption{Matricea de Confuzie.}
+    \label{fig:conf_matrix_rf_final}
+\end{figure}
+
+\textit{Interpretare:} Acuratetea generala a modelului pe setul de test a fost de 48\%.
+Conform Tabelului \ref{tab:classification_report_final}, se observa dificultati majore in clasificarea corecta a clasei 'Invitation', pentru care precision, recall si F1-score sunt 0.00. Acest lucru indica faptul ca toate instantele 'Invitation' din setul de test au fost misclasificate, cel mai des ca 'Contentment', din cauza unei posibile suprapuneri mari a caracteristicilor. Pentru celelalte clase, performanta a fost mai buna, in special Contentment si Distress - scorul recall este de 0.84 respectiv 0.62, indicand o incredere decenta in predictii.
+Matricea de confuzie (Figura \ref{fig:conf_matrix_rf_final}) confirma vizual problemele cu clasa 'Invitation', aratand ca toate instantele reale ale acestei clase sunt prezise ca apartinand altei clase. Diagonala principala arata numarul de predictii corecte pentru fiecare clasa.
+Eu atribui performatele scazute ale modelului naturii sintetice a setului de date.
 \end{document}
